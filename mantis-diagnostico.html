@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mantis · Diagnóstico y Retorno Digital</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Gelasio:wght@400;700&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#0d0f14;--card:#1b1e28;--line:#3a3626;--gold:#e8c96a;--gold2:#f3dd8e;--gold3:#9a7a1e;--txt:#f1ece0;--mut:#8b93a1;--paper:#f7f0e3;--red:#b03a2e;
+--serif:Georgia,Gelasio,"Times New Roman",serif;--mono:"Courier New","Courier Prime",Courier,monospace}
+*,*:before,*:after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#171a23,var(--bg) 60%);color:var(--txt);font-family:Arial,Helvetica,sans-serif;display:flex;justify-content:center}
+.wrap{width:100%;max-width:440px;padding:34px 18px 40px;text-align:center}
+.brand{font-family:var(--serif);letter-spacing:.32em;color:var(--gold2);font-size:19px;margin:10px 0 4px;padding-left:.32em}
+.sub{font-size:8.5px;letter-spacing:.3em;color:var(--mut);text-transform:uppercase;padding-left:.3em}
+h1{font-family:var(--serif);font-weight:400;font-size:24px;margin:26px 0 22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 22px 24px;text-align:left}
+.bar{height:3px;background:#33343c;border-radius:2px;margin-bottom:18px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold2),var(--gold3));transition:width .35s}
+.step{font-size:11px;letter-spacing:.16em;color:var(--gold);text-transform:uppercase;margin-bottom:16px}
+.q{font-family:var(--serif);font-weight:400;font-size:16px;line-height:1.4;margin:0 0 14px;color:#f4efe3}
+.opts{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:22px}
+.opt{flex:1 1 auto;background:transparent;color:#d9d9d9;border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;cursor:pointer;transition:.15s}
+.opt:hover{border-color:var(--gold3)}
+.opt.on{border-color:var(--gold);color:var(--gold2);background:rgba(232,201,106,.08)}
+.nav{display:flex;gap:14px;align-items:center}
+.back{background:none;border:0;color:var(--mut);font-size:15px;font-family:inherit;cursor:pointer;padding:10px 14px}
+.go{flex:1;border:0;border-radius:8px;padding:15px;font-weight:700;font-size:15px;font-family:inherit;color:#1a1608;cursor:pointer;background:linear-gradient(100deg,var(--gold2),var(--gold3))}
+.go:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+.big{font-family:var(--serif);font-size:26px;color:var(--gold2);margin:4px 0 0}
+.lbl{font-family:var(--serif);font-weight:400;font-size:14.5px;margin:2px 0 12px;color:#f4efe3}
+.note{font-size:12px;font-style:italic;color:var(--mut);margin:8px 0 18px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:#3a3b45;border-radius:2px;margin:10px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--gold2);border:3px solid #6b5a22;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--gold2);border:3px solid #6b5a22;cursor:pointer}
+.intro{font-size:14px;line-height:1.5;color:#d6d6d6;margin:26px 8px 18px}
+.rc{background:var(--paper);color:#1f2626;font-family:var(--mono);padding:26px 22px 6px;text-align:left;animation:feed .35s ease-out both}
+.rt{text-align:center;font-weight:700;letter-spacing:.1em;font-size:14px}
+.rs{text-align:center;font-size:12.5px;color:#6b6a62;margin:10px 0 22px}
+.ln{display:flex;justify-content:space-between;font-size:14px;margin:0 0 15px;opacity:0}
+.ln.sm{font-size:13px;color:#77756c}
+.dash{border-top:1px dashed #c4b99f;margin:2px 0 17px;opacity:0}
+.ln.show,.dash.show{animation:print .3s ease-out both}
+@keyframes print{from{opacity:0;transform:translateY(7px);clip-path:inset(0 100% 0 0)}to{opacity:1;transform:none;clip-path:inset(0 0 0 0)}}
+@keyframes feed{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+.zig{height:9px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='9'%3E%3Cpolygon points='0,0 18,0 9,9' fill='%23f7f0e3'/%3E%3C/svg%3E") repeat-x}
+.stampbox{display:flex;justify-content:center;padding:14px 0 28px}
+.stamp{width:136px;height:136px;border:3px solid var(--red);border-radius:50%;color:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-8deg);opacity:0;text-align:center}
+.stamp.show{animation:slam .6s cubic-bezier(.3,1.3,.5,1) both}
+@keyframes slam{0%{opacity:0;transform:rotate(-20deg) scale(2.6)}55%{opacity:1;transform:rotate(-8deg) scale(.9)}78%{transform:rotate(-8deg) scale(1.06)}100%{opacity:1;transform:rotate(-8deg) scale(1)}}
+.stamp b{font-family:var(--serif);font-size:27px;line-height:1}
+.stamp span{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;margin-top:8px;max-width:96px;line-height:1.5;opacity:.75}
+.foot{font-size:12px;color:#9aa3ad;margin-top:26px}
+.hide{display:none}
+@keyframes printfade{from{opacity:0}to{opacity:1}}
+@keyframes stampfade{from{opacity:0}to{opacity:1;transform:rotate(-8deg)}}
+@media (prefers-reduced-motion:reduce){.ln.show,.dash.show{animation-name:printfade;animation-duration:.3s}.stamp.show{animation-name:stampfade;animation-duration:.5s}.rc{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3dd8e"/><stop offset="1" stop-color="#b58f2a"/></linearGradient>
+    </defs>
+    <path d="M32 3 61 32 32 61 3 32Z" stroke="url(#g)" stroke-width="1.8" stroke-linejoin="miter"/>
+    <path d="M32 10 54 32 32 54 10 32Z" stroke="#9a7a1e" stroke-width=".9" opacity=".8"/>
+    <path d="M20.6 41V23L32 35.6 43.4 23V41" stroke="url(#g)" stroke-width="1.7" stroke-linejoin="miter" stroke-linecap="butt"/>
+  </svg>
+  <div class="brand">MANTIS</div>
+  <div class="sub">Digital Marketing Agency</div>
+  <h1>Diagnóstico y Retorno Digital</h1>
+
+  <div class="card">
+    <div class="bar"><i id="prog" style="width:33%"></i></div>
+
+    <section id="s1">
+      <div class="step">Paso 1 de 3 — Su negocio hoy</div>
+      <p class="q">¿Cuál es el giro principal de su negocio?</p>
+      <div class="opts" data-k="giro">
+        <button class="opt">Restaurante / Café</button><button class="opt">Clínica / Consultorio</button>
+        <button class="opt">Taller / Mecánica</button><button class="opt">Despacho / Abogados</button>
+        <button class="opt">Salón / Barbería</button><button class="opt">Tienda / Comercio</button><button class="opt">Otro</button>
+      </div>
+      <div class="nav"><button class="go" data-next="2" disabled>Continuar →</button></div>
+    </section>
+
+    <section id="s2" class="hide">
+      <div class="step">Paso 2 de 3 — Su posición frente a la competencia</div>
+      <p class="q">¿Cree que su negocio aparece en Google antes o después que su competencia directa?</p>
+      <div class="opts" data-k="pos">
+        <button class="opt">Antes que ellos</button><button class="opt">Después que ellos</button><button class="opt" style="flex-basis:100%">No estoy seguro</button>
+      </div>
+      <div class="nav"><button class="back" data-prev="1">← Atrás</button><button class="go" data-next="3" disabled>Continuar →</button></div>
+    </section>
+
+    <section id="s3" class="hide">
+      <div class="step">Paso 3 de 3 — Su retorno potencial</div>
+      <div class="big" id="tv">$10 MXN</div>
+      <div class="lbl">Ticket promedio por cliente</div>
+      <input type="range" id="ticket" min="10" max="10000" step="10" value="10" aria-label="Ticket promedio por cliente">
+      <div class="big" id="cv" style="margin-top:22px">30 clientes nuevos / mes</div>
+      <div class="lbl" style="margin-bottom:4px">Clientes nuevos estimados al mes gracias a su nuevo sitio</div>
+      <input type="range" id="clientes" min="30" max="400" step="5" value="30" aria-label="Clientes nuevos al mes">
+      <div class="note">El mínimo son 30: apenas 1 cliente nuevo por día gracias al sitio</div>
+      <div class="nav" style="margin-bottom:12px"><button class="back" data-prev="2">← Atrás</button></div>
+      <button class="go" id="calc" style="width:100%">Calcular retorno</button>
+    </section>
+  </div>
+
+  <div id="res" class="hide">
+    <p class="intro" id="intro"></p>
+    <div class="rc" id="rc">
+      <div class="rt">RETORNO ESTIMADO</div>
+      <div class="rs">Inversión única · $6,790 MXN</div>
+      <div class="ln"><span>Ticket promedio</span><span data-v="t"></span></div>
+      <div class="ln"><span>Clientes nuevos/mes</span><span data-v="c"></span></div>
+      <div class="ln sm"><span>Ingreso extra mensual</span><span data-v="m"></span></div>
+      <div class="dash"></div>
+      <div class="ln"><span>Retorno a 3 meses</span><span data-v="m3"></span></div>
+      <div class="ln"><span>Retorno a 6 meses</span><span data-v="m6"></span></div>
+      <div class="ln"><span>Retorno a 12 meses</span><span data-v="m12"></span></div>
+      <div class="dash"></div>
+      <div class="ln"><span>Inversión inicial</span><span data-v="i"></span></div>
+      <div class="stampbox"><div class="stamp" id="st"><b id="mult">0.0x</b><span>de retorno en 12 meses</span></div></div>
+    </div>
+    <div class="zig"></div>
+  </div>
+  <div class="foot">Es un piso conservador, no un techo.</div>
+</div>
+
+<script>
+var INV = 6790, ans = {giro:null,pos:null}, timers = [], raf = [];
+var INTROS = {
+  "Antes que ellos": "Con base en que su negocio ya aparece antes que su competencia, esto es lo que representa mantener y ampliar esa ventaja:",
+  "Después que ellos": "Con base en que su competencia aparece antes que usted en Google, esto es lo que representa alcanzarla:",
+  "No estoy seguro": "Con base en que no tiene certeza de en qué posición aparece frente a su competencia, esto es lo que representa resolverlo:"
+};
+var $ = function(id){return document.getElementById(id)};
+var money = function(n){return "$" + Math.round(n).toLocaleString("en-US")};
+
+function show(n){
+  [1,2,3].forEach(function(i){ $("s"+i).classList.toggle("hide", i!==n); });
+  $("prog").style.width = (n*33.33)+"%";
+  $("res").classList.add("hide");
+}
+document.querySelectorAll(".opts").forEach(function(g){
+  g.addEventListener("click", function(e){
+    var b = e.target.closest(".opt"); if(!b) return;
+    g.querySelectorAll(".opt").forEach(function(o){o.classList.remove("on")});
+    b.classList.add("on");
+    ans[g.dataset.k] = b.textContent;
+    g.parentNode.querySelector(".go").disabled = false;
+  });
+});
+document.querySelectorAll("[data-next]").forEach(function(b){b.onclick=function(){show(+b.dataset.next)}});
+document.querySelectorAll("[data-prev]").forEach(function(b){b.onclick=function(){show(+b.dataset.prev)}});
+
+function sync(){
+  $("tv").textContent = money(+$("ticket").value) + " MXN";
+  $("cv").textContent = $("clientes").value + " clientes nuevos / mes";
+}
+$("ticket").oninput = sync; $("clientes").oninput = sync;
+
+function count(el, to, fmt, dur){
+  var t0 = performance.now();
+  (function tick(now){
+    var p = Math.min(1,(now-t0)/dur), e = 1-Math.pow(1-p,3);
+    el.textContent = fmt(to*e);
+    if(p<1) raf.push(requestAnimationFrame(tick));
+  })(t0);
+}
+
+$("calc").onclick = function(){
+  var t = +$("ticket").value, c = +$("clientes").value, m = t*c;
+  timers.forEach(clearTimeout); raf.forEach(cancelAnimationFrame); timers = []; raf = [];
+  var vals = {t:t, c:c, m:m, m3:m*3, m6:m*6, m12:m*12, i:INV};
+  var rc = $("rc"), lines = rc.querySelectorAll(".ln,.dash"), st = $("st");
+  lines.forEach(function(x){x.classList.remove("show")});
+  st.classList.remove("show"); $("mult").textContent = "0.0x";
+  $("intro").textContent = INTROS[ans.pos] || INTROS["No estoy seguro"];
+  $("res").classList.remove("hide");
+  rc.style.animation = "none"; void rc.offsetWidth; rc.style.animation = "";
+  $("res").scrollIntoView({behavior:"smooth", block:"start"});
+
+  var gaps = [0,260,260,340,380,300,300,460,340], t = 650;
+  lines.forEach(function(el,i){
+    t += gaps[i] || 280;
+    timers.push(setTimeout(function(){
+      el.classList.add("show");
+      var v = el.querySelector("[data-v]");
+      if(v){
+        var k = v.dataset.v, fmt = k==="c" ? function(n){return Math.round(n)} : money;
+        count(v, vals[k], fmt, 520);
+      }
+    }, t));
+  });
+  timers.push(setTimeout(function(){
+    st.classList.add("show");
+    count($("mult"), m*12/INV, function(n){return n.toFixed(1)+"x"}, 1100);
+  }, t + 950));
+};
+</script>
+</body>
+</html>
