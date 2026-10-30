@@ -33,6 +33,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold2);outline-
 .big{font-family:var(--serif);font-size:26px;color:var(--gold2);margin:4px 0 0}
 .lbl{font-family:var(--serif);font-weight:400;font-size:14.5px;margin:2px 0 12px;color:#f4efe3}
 .note{font-size:12px;font-style:italic;color:var(--mut);margin:8px 0 18px}
+.tnum{font-size:13px;color:var(--mut);margin:2px 0 6px}
+.tnum input{width:130px;background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--txt);padding:6px 8px;font-family:inherit;font-size:14px}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:#3a3b45;border-radius:2px;margin:10px 0}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--gold2);border:3px solid #6b5a22;cursor:pointer}
 input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--gold2);border:3px solid #6b5a22;cursor:pointer}
@@ -101,11 +103,11 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
       <div class="step">Paso 3 de 3 — Su retorno potencial</div>
       <div class="big" id="tv">$10 MXN</div>
       <div class="lbl">Ticket promedio por cliente</div>
-      <input type="range" id="ticket" min="10" max="10000" step="10" value="10" aria-label="Ticket promedio por cliente">
+      <input type="range" id="ticket" min="0" max="1000" step="1" value="0" aria-label="Ticket promedio por cliente">
+      <div class="tnum">o escríbelo: $<input type="number" id="ticketNum" min="10" max="1000000" step="10" value="10"> MXN</div>
       <div class="big" id="cv" style="margin-top:22px">30 clientes nuevos / mes</div>
       <div class="lbl" style="margin-bottom:4px">Clientes nuevos estimados al mes gracias a su nuevo sitio</div>
-      <input type="range" id="clientes" min="30" max="400" step="5" value="30" aria-label="Clientes nuevos al mes">
-      <div class="note">El mínimo son 30: apenas 1 cliente nuevo por día gracias a la estrategia digital</div>
+      <input type="range" id="clientes" min="5" max="400" step="5" value="30" aria-label="Clientes nuevos al mes">
       <div class="nav" style="margin-bottom:12px"><button class="back" data-prev="2">← Atrás</button></div>
       <button class="go" id="calc" style="width:100%">Calcular retorno</button>
     </section>
@@ -158,11 +160,26 @@ document.querySelectorAll(".opts").forEach(function(g){
 document.querySelectorAll("[data-next]").forEach(function(b){b.onclick=function(){show(+b.dataset.next)}});
 document.querySelectorAll("[data-prev]").forEach(function(b){b.onclick=function(){show(+b.dataset.prev)}});
 
-function sync(){
-  $("tv").textContent = money(+$("ticket").value) + " MXN";
-  $("cv").textContent = $("clientes").value + " clientes nuevos / mes";
+var tk = 10;
+function niceRound(a){
+  var s = a < 1000 ? 10 : a < 10000 ? 100 : a < 100000 ? 500 : 1000;
+  return Math.max(10, Math.round(a/s)*s);
 }
-$("ticket").oninput = sync; $("clientes").oninput = sync;
+$("ticket").oninput = function(){
+  tk = niceRound(10 * Math.pow(10, 5 * (+$("ticket").value) / 1000));
+  $("tv").textContent = money(tk) + " MXN";
+  $("ticketNum").value = tk;
+};
+$("ticketNum").oninput = function(){
+  var v = +$("ticketNum").value;
+  if(!v || v < 10) return;
+  tk = Math.min(1000000, v);
+  $("ticket").value = Math.round(1000 * Math.log10(tk/10) / 5);
+  $("tv").textContent = money(tk) + " MXN";
+};
+$("clientes").oninput = function(){
+  $("cv").textContent = $("clientes").value + " clientes nuevos / mes";
+};
 
 function count(el, to, fmt, dur){
   var t0 = performance.now();
@@ -174,7 +191,7 @@ function count(el, to, fmt, dur){
 }
 
 $("calc").onclick = function(){
-  var t = +$("ticket").value, c = +$("clientes").value, m = t*c;
+  var t = tk, c = +$("clientes").value, m = t*c;
   timers.forEach(clearTimeout); raf.forEach(cancelAnimationFrame); timers = []; raf = [];
   var vals = {t:t, c:c, m:m, m3:m*3, m6:m*6, m12:m*12, i:INV};
   var rc = $("rc"), lines = rc.querySelectorAll(".ln,.dash"), st = $("st");
